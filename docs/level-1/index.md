@@ -29,12 +29,12 @@ Use the "Next" button at the bottom of each page to progress through the lessons
 :maxdepth: 1
 :caption: Level 1 Lessons
 
-    L01.md
-    L02.md
-    L03.md
-    L04.md
-    L05.md
-    L06.md
-    L07.md
-    L08.md
+    level-1/L01.md
+    level-1/L02.md
+    level-1/L03.md
+    level-1/L04.md
+    level-1/L05.md
+    level-1/L06.md
+    level-1/L07.md
+    level-1/L08.md
 ```
