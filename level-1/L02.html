@@ -631,21 +631,23 @@ window.runMermaid = runMermaid;</script>
              
   <section id="lesson-2-separation-of-concerns-coupling-cohesion">
 <h1>Lesson 2 — Separation of Concerns, Coupling &amp; Cohesion<a class="headerlink" href="#lesson-2-separation-of-concerns-coupling-cohesion" title="Link to this heading"></a></h1>
+<hr class="docutils" />
 <section id="recap">
 <h2>Recap<a class="headerlink" href="#recap" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Recap — Lesson 1: What Is System Architecture?</strong>
-System architecture is the high-level structure of a software system — its components, their responsibilities, and how they interact.
-Key terms: system architecture, SDLC, technical debt, God class, separation of concerns
-We are building on the distinction between a system that grew organically and one that was deliberately designed, using a Task Management System as our running example.</p>
+System architecture is the high-level structure of a software system — its components, their responsibilities, and the rules governing how they interact.
+Key terms introduced: system architecture, SDLC, technical debt, God class, separation of concerns
+We are building on <strong>separation of concerns</strong> in this lesson to give it precise, measurable form.</p>
 </div>
 </section>
 <hr class="docutils" />
 <section id="preamble">
 <h2>Preamble<a class="headerlink" href="#preamble" title="Link to this heading"></a></h2>
-<p>In Lesson 1, we saw how a system that grows organically becomes brittle and hard to change — the <code class="docutils literal notranslate"><span class="pre">Task</span></code> god class was doing too much, and the cost of any change was unpredictably high. Now we will name the principles that explain <em>why</em> that design failed and <em>what</em> a well-structured alternative looks like.</p>
-<p>By the end of this lesson, you will be able to measure the quality of any component boundary using two concrete metrics — <strong>coupling</strong> and <strong>cohesion</strong> — and you will be able to spot the named design patterns these principles naturally produce.</p>
+<p>In Lesson 1, you saw the difference between a <code class="docutils literal notranslate"><span class="pre">Task</span></code> class that did everything and a designed system where each component had one responsibility. You understood intuitively that the first was bad. In this lesson, we give that intuition a precise vocabulary.</p>
+<p>How do you <em>measure</em> whether a design is good? How do you explain to a teammate why splitting a class matters beyond “it feels right”? The answer is three metrics that apply to any codebase: <strong>separation of concerns</strong> (what responsibilities belong together), <strong>coupling</strong> (how much components depend on each other), and <strong>cohesion</strong> (how related the elements inside a component are).</p>
+<p>By the end of this lesson, you will be able to look at a component diagram and explain why one architecture will age gracefully while another will become brittle. You will also meet three design patterns by name — Factory, Repository, and Observer — that you will encounter repeatedly throughout this course.</p>
 </section>
 <hr class="docutils" />
 <section id="outcomes">
@@ -655,14 +657,14 @@ We are building on the distinction between a system that grew organically and on
 <li><p>Define separation of concerns and identify violations of it</p></li>
 <li><p>Explain the difference between tight and loose coupling with examples</p></li>
 <li><p>Define cohesion and distinguish high from low cohesion</p></li>
-<li><p>Identify the Factory, Repository, and Observer pattern names in code examples</p></li>
+<li><p>Identify the Factory, Repository, and Observer pattern names in structural diagrams</p></li>
 </ul>
 </section>
 <hr class="docutils" />
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="L01.html"><span class="std std-doc">Lesson 1 — What Is System Architecture?</span></a></p></li>
+<li><p>L01 — What Is System Architecture?</p></li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -670,13 +672,21 @@ We are building on the distinction between a system that grew organically and on
 <h2>§1<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <section id="separation-of-concerns">
 <h3>Separation of Concerns<a class="headerlink" href="#separation-of-concerns" title="Link to this heading"></a></h3>
-<p>The principle of <strong>separation of concerns</strong> states that a program should be divided into distinct sections where each section addresses a separate concern.<a class="footnote-reference brackets" href="#id11" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Every component should have one reason to change. When a component mixes concerns, it has multiple reasons to change — and each change risks breaking the others.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p><strong>The Single Responsibility Test</strong>
-Try to describe what a component does in a single sentence. If you find yourself using “and” or “also,” the component likely has multiple concerns and should be split.</p>
-</div>
-<p>In Lesson 1 we saw the <code class="docutils literal notranslate"><span class="pre">Task</span></code> god class violate this principle — it handled data storage, web formatting, user assignment, and notifications all at once. The designed version corrected this by giving each responsibility its own component:</p>
+<p>In Lesson 1, we introduced <strong>separation of concerns</strong> as a principle — the idea that each component should have one clearly defined responsibility, with minimal overlap into the responsibilities of others.<a class="footnote-reference brackets" href="#id9" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Here we make it concrete and testable.</p>
+<p>A violation occurs when a single component handles multiple <em>types</em> of work that could change independently. The god class in L01 §4.1 violated it: <code class="docutils literal notranslate"><span class="pre">Task</span></code> handled data storage, web display, notifications, and user assignment all at once.</p>
+<pre  class="mermaid">
+        classDiagram
+    class Task {
+        +String title
+        +String description
+        +String status
+        +saveToDatabase()
+        +formatForWebDisplay()
+        +sendOverdueNotification()
+        +assignToUser()
+    }
+    </pre><p>If the notification medium changes (email → SMS), <code class="docutils literal notranslate"><span class="pre">Task</span></code> must be modified. If the display format changes (web → mobile), <code class="docutils literal notranslate"><span class="pre">Task</span></code> must be modified. If the database schema changes, <code class="docutils literal notranslate"><span class="pre">Task</span></code> must be modified. Each independent change opens the entire class to accidental breakage.</p>
+<p>A separated design insulates those concerns from each other:</p>
 <pre  class="mermaid">
         classDiagram
     class Task {
@@ -685,7 +695,8 @@ Try to describe what a component does in a single sentence. If you find yourself
         +String status
     }
     class TaskRepository {
-        +saveToDatabase(Task)
+        +save(Task)
+        +findById(id)
     }
     class TaskFormatter {
         +formatForWebDisplay(Task)
@@ -697,156 +708,244 @@ Try to describe what a component does in a single sentence. If you find yourself
     TaskRepository --&gt; Task : stores
     TaskFormatter --&gt; Task : formats
     NotificationService --&gt; Task : reads
-    </pre><p>Each component now has exactly one reason to change. If the notification medium changes (email → SMS), only <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> changes. If the database changes, only <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> changes.</p>
+    </pre><p><code class="docutils literal notranslate"><span class="pre">Task</span></code> is now pure data. If the database changes, only <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> needs to change — the formatter and notifier are completely insulated from that decision.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>The Single Responsibility Test.</strong> Ask: “What change would force me to modify this component?” If you can name more than one <em>unrelated</em> reason — database changes, UI changes, notification changes — the component is carrying more than one concern.</p>
+</div>
 </section>
 <section id="formative-check-in">
 <h3>Formative Check-in<a class="headerlink" href="#formative-check-in" title="Link to this heading"></a></h3>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>Before reading on: If the team decides to change how tasks are displayed in the browser, which component in the diagram above would need to change? Which components would be completely unaffected?</p>
+<p>Before reading on: In the separated design above, if the team decides to switch from sending overdue email notifications to sending SMS, which component changes? Why are <code class="docutils literal notranslate"><span class="pre">Task</span></code>, <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code>, and <code class="docutils literal notranslate"><span class="pre">TaskFormatter</span></code> unaffected?</p>
 </div>
 </section>
 </section>
 <hr class="docutils" />
 <section id="id3">
 <h2>§2<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
-<section id="coupling-measuring-interdependence">
-<h3>Coupling: Measuring Interdependence<a class="headerlink" href="#coupling-measuring-interdependence" title="Link to this heading"></a></h3>
-<p><strong>Coupling</strong> refers to the degree of direct knowledge that one component has of another.<a class="footnote-reference brackets" href="#id12" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> When components are <strong>tightly coupled</strong>, changes to one often require changes to others. When they are <strong>loosely coupled</strong>, components can be modified independently.</p>
+<section id="coupling">
+<h3>Coupling<a class="headerlink" href="#coupling" title="Link to this heading"></a></h3>
+<p><strong>Coupling</strong> is the degree to which one component depends on another.<a class="footnote-reference brackets" href="#id10" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> Some coupling is unavoidable — components in a system must communicate. What varies is its <em>tightness</em>.</p>
+<p><strong>Tight coupling</strong> exists when a component reaches directly into the concrete implementation of another: it knows the other’s field names, internal APIs, and data formats. A change to the depended-on component propagates immediately to everything that depends on it.</p>
+<p><strong>Loose coupling</strong> exists when components interact only through a well-defined, stable interface. One component does not know or care <em>how</em> the other does its work — only what it provides.</p>
+<pre  class="mermaid">
+        classDiagram
+    class Task_Tight {
+        +saveToDatabase()
+    }
+    class MySQLDatabase {
+        +connect()
+        +execute(query)
+    }
+    Task_Tight --&gt; MySQLDatabase : direct dependency
+    </pre><p>Here, <code class="docutils literal notranslate"><span class="pre">Task</span></code> reaches directly into <code class="docutils literal notranslate"><span class="pre">MySQLDatabase</span></code>. Switching to PostgreSQL requires modifying <code class="docutils literal notranslate"><span class="pre">Task</span></code>.</p>
+<pre  class="mermaid">
+        classDiagram
+    class Task_Loose {
+        +save()
+    }
+    class TaskRepository {
+        +save(Task)
+        +findById(id)
+    }
+    class MySQLDatabase {
+        +connect()
+        +execute(query)
+    }
+    class PostgreSQLDatabase {
+        +connect()
+        +execute(query)
+    }
+
+    Task_Loose --&gt; TaskRepository : uses interface
+    TaskRepository --&gt; MySQLDatabase : implements with
+    TaskRepository ..&gt; PostgreSQLDatabase : can swap to
+    </pre><p>Now <code class="docutils literal notranslate"><span class="pre">Task</span></code> depends on <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code>. The repository can swap its underlying database without <code class="docutils literal notranslate"><span class="pre">Task</span></code> knowing or caring.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>Coupling Disguised as Convenience</strong>
-Tight coupling often appears as a shortcut. Directly instantiating a dependency inside a component feels faster — but it binds the two components together permanently, making testing and future changes expensive.</p>
+<p><strong>Coupling disguised as convenience.</strong> Accessing a deeply nested attribute in one step (<code class="docutils literal notranslate"><span class="pre">order.task.project.owner.email</span></code>) feels like a shortcut. It is tight coupling: your component now knows the internal structure of three other components. Any restructuring breaks your code silently.</p>
 </div>
-<p>Compare two designs for <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code>. In the first, the repository creates its own database connection:</p>
-<pre  class="mermaid">
-        classDiagram
-    class TaskRepository {
-        -connection : MySQLConnection
-        +TaskRepository()
-        +save(Task)
-    }
-    class MySQLConnection {
-        +connect(host, user, password)
-    }
-    TaskRepository --&gt; MySQLConnection : creates internally
-    </pre><p>In the second, the connection is <em>passed in</em> rather than created:</p>
-<pre  class="mermaid">
-        classDiagram
-    class TaskRepository {
-        -connection : DatabaseConnection
-        +TaskRepository(connection)
-        +save(Task)
-    }
-    class DatabaseConnection {
-        &lt;&lt;interface&gt;&gt;
-        +cursor()
-    }
-    TaskRepository --&gt; DatabaseConnection : depends on abstraction
-    </pre><p>In the loosely coupled design, <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> does not care whether the connection is MySQL, PostgreSQL, or a test fake. It depends on an abstraction, not a concrete implementation. This is called <strong>dependency injection</strong> — the dependency is provided from outside rather than created inside.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Coupling level</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Change impact</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Tight</strong></p></td>
+<td><p>Component A knows the concrete details of Component B</p></td>
+<td><p>Changing B’s internals requires changing A</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Loose</strong></p></td>
+<td><p>Component A depends on a stable interface of Component B</p></td>
+<td><p>Changing B’s implementation does not affect A</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>None</strong></p></td>
+<td><p>Components are completely independent</p></td>
+<td><p>No impact (rare in real systems)</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 <hr class="docutils" />
 <section id="id5">
 <h2>§3<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
-<section id="cohesion-measuring-focus">
-<h3>Cohesion: Measuring Focus<a class="headerlink" href="#cohesion-measuring-focus" title="Link to this heading"></a></h3>
-<p><strong>Cohesion</strong> measures how closely related the responsibilities within a single component are.<a class="footnote-reference brackets" href="#id13" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> <strong>High cohesion</strong> means a component does one thing well. <strong>Low cohesion</strong> means a component tries to do many unrelated things.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>High cohesion and low coupling tend to go together. A component that does one thing well (high cohesion) typically needs fewer dependencies on other components (low coupling).</p>
-</div>
-<p>Consider a catch-all utility component in a task management system:</p>
-<pre  class="mermaid">
-        classDiagram
-    class TaskUtilities {
-        +calculateOverdueFee(Task)
-        +formatForWebDisplay(Task)
-        +sendNotification(Task)
-        +validateTaskTitle(Task)
-    }
-    </pre><p>This component has <strong>low cohesion</strong> — it mixes fee business logic, presentation logic, external communication, and data validation. No single sentence can describe what it does without using “and.”</p>
-<p>The high-cohesion alternative splits each responsibility into its own component:</p>
-<pre  class="mermaid">
-        classDiagram
-    class FeeCalculator {
-        +calculateOverdueFee(Task)
-    }
-    class TaskFormatter {
-        +formatForWebDisplay(Task)
-    }
-    class NotificationService {
-        +sendNotification(Task)
-    }
-    class TaskValidator {
-        +validateTaskTitle(Task)
-    }
-    </pre><p>Each component now has a single, clearly-stated purpose. Each is independently testable and reusable.</p>
-</section>
-</section>
-<hr class="docutils" />
-<section id="id7">
-<h2>§4<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
-<section id="design-patterns-named-solutions">
-<h3>Design Patterns: Named Solutions<a class="headerlink" href="#design-patterns-named-solutions" title="Link to this heading"></a></h3>
-<p>When separation of concerns, low coupling, and high cohesion are applied consistently, certain structures emerge again and again across codebases. These recurring structures have been catalogued and named — they are called <strong>design patterns</strong>.<a class="footnote-reference brackets" href="#id14" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p>
-<p>You do not need to implement these patterns yet. The goal here is recognition: when you see a pattern in code later in this course, you will know its name and what problem it is solving.</p>
-<section id="the-repository-pattern">
-<h4>The Repository Pattern<a class="headerlink" href="#the-repository-pattern" title="Link to this heading"></a></h4>
-<p>Separates data persistence from business logic. The rest of the application talks to a repository, not directly to a database.</p>
+<section id="cohesion">
+<h3>Cohesion<a class="headerlink" href="#cohesion" title="Link to this heading"></a></h3>
+<p><strong>Cohesion</strong> is the degree to which the elements within a single component belong together.<a class="footnote-reference brackets" href="#id10" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> High cohesion means all methods and data in a component serve one unified purpose. Low cohesion means the component has accumulated responsibilities that have little to do with each other — a god class by another name.</p>
 <pre  class="mermaid">
         classDiagram
     class TaskRepository {
         +save(Task)
         +findById(id)
-        +findAllOverdue()
+        +delete(id)
+        +update(Task)
     }
-    class Task {
-        +String title
-        +String status
-    }
-    TaskRepository --&gt; Task : manages
-    </pre></section>
-<section id="the-factory-pattern">
-<h4>The Factory Pattern<a class="headerlink" href="#the-factory-pattern" title="Link to this heading"></a></h4>
-<p>Separates object creation logic from the rest of the application. When constructing an object becomes complex, a factory component owns that complexity.</p>
+    </pre><p><code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> has high cohesion: every method is a persistence operation on <code class="docutils literal notranslate"><span class="pre">Task</span></code> objects. A developer reading this component immediately understands its purpose and knows exactly what it will and will not do.</p>
 <pre  class="mermaid">
         classDiagram
-    class TaskFactory {
-        +createUrgentTask(title) Task
-        +createScheduledTask(title, dueDate) Task
+    class TaskUtils {
+        +saveToDatabase(Task)
+        +formatForWebDisplay(Task)
+        +sendEmail(to, subject, body)
+        +calculateTax(amount)
+        +generatePDF(data)
     }
+    </pre><p><code class="docutils literal notranslate"><span class="pre">TaskUtils</span></code> handles database operations, UI formatting, email, tax calculation, and PDF generation. These concerns are entirely unrelated. This is low cohesion.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>The Cohesion Test.</strong> Read the component name and ask: “This component handles X.” If X must be a list of unrelated things — “database and email and PDFs and taxes” — cohesion is low.</p>
+</div>
+</section>
+<section id="coupling-and-cohesion-together">
+<h3>Coupling and Cohesion Together<a class="headerlink" href="#coupling-and-cohesion-together" title="Link to this heading"></a></h3>
+<p>These two metrics measure opposite things but serve the same goal. Coupling is about the space <em>between</em> components; cohesion is about the space <em>inside</em> a component.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Concept</p></th>
+<th class="head"><p>Asks about</p></th>
+<th class="head"><p>Goal</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Coupling</p></td>
+<td><p>How much does Component A depend on Component B?</p></td>
+<td><p>Minimise</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cohesion</p></td>
+<td><p>How well do the elements inside Component A belong together?</p></td>
+<td><p>Maximise</p></td>
+</tr>
+</tbody>
+</table>
+<p>Their combinations produce four architectural outcomes:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p><strong>High cohesion</strong></p></th>
+<th class="head"><p><strong>Low cohesion</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Loose coupling</strong></p></td>
+<td><p>✅ Easy to change, easy to understand</p></td>
+<td><p>⚠️ Easy to change, hard to understand</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Tight coupling</strong></p></td>
+<td><p>⚠️ Hard to change, easy to understand</p></td>
+<td><p>❌ Hard to change, hard to understand</p></td>
+</tr>
+</tbody>
+</table>
+<p>The goal is the top-left cell: <strong>loose coupling + high cohesion</strong>. The bottom-right cell — the <code class="docutils literal notranslate"><span class="pre">TaskUtils</span></code> god class, tightly coupled to everything it reaches into — is the disaster scenario: every change is risky and no component is comprehensible in isolation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Low cohesion and tight coupling tend to appear together. A component that does too many things inevitably reaches into the internals of many others to accomplish them. Fixing cohesion problems often resolves coupling problems at the same time.</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id7">
+<h2>§4<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<section id="design-patterns-names-for-common-solutions">
+<h3>Design Patterns: Names for Common Solutions<a class="headerlink" href="#design-patterns-names-for-common-solutions" title="Link to this heading"></a></h3>
+<p>When you apply separation of concerns, high cohesion, and loose coupling consistently, certain structural solutions appear repeatedly. These solutions have names — <strong>design patterns</strong> — documented systematically in software engineering literature.<a class="footnote-reference brackets" href="#id11" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p>
+<p>Three patterns emerge naturally from the Task Management System design. You do not need to implement them now; you need to recognise them when they appear in code.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Gang of Four.</strong> These patterns are documented in <em>Design Patterns: Elements of Reusable Object-Oriented Software</em> (Gamma, Helm, Johnson, Vlissides — 1994), commonly called the “Gang of Four” book. The names used throughout this course come from this source.</p>
+</div>
+<section id="the-repository-pattern">
+<h4>§4.1 The Repository Pattern<a class="headerlink" href="#the-repository-pattern" title="Link to this heading"></a></h4>
+<p>The Repository pattern abstracts all data access behind a consistent interface. Instead of components querying the database directly, all storage operations flow through a repository that presents a clean API to the rest of the system.</p>
+<pre  class="mermaid">
+        classDiagram
     class Task {
         +String title
-        +String priority
         +String status
     }
+    class TaskRepository {
+        +save(Task)
+        +findById(id)
+        +findAll()
+        +delete(id)
+    }
+    class TaskService {
+        +createTask(title)
+        +completeTask(id)
+    }
+
+    TaskService --&gt; TaskRepository : uses
+    TaskRepository --&gt; Task : manages
+    </pre><p><code class="docutils literal notranslate"><span class="pre">TaskService</span></code> never knows whether tasks are stored in PostgreSQL, a file, or memory. The repository interface stays stable regardless of what is behind it.</p>
+</section>
+<section id="the-factory-pattern">
+<h4>§4.2 The Factory Pattern<a class="headerlink" href="#the-factory-pattern" title="Link to this heading"></a></h4>
+<p>The Factory pattern delegates object construction to a dedicated component. Instead of building a <code class="docutils literal notranslate"><span class="pre">Task</span></code> object inline wherever it is needed, callers ask a factory to produce it — and the factory handles default values, validation, and initialisation rules.</p>
+<pre  class="mermaid">
+        classDiagram
+    class Task {
+        +String title
+        +String status
+        +DateTime createdAt
+        +User assignee
+    }
+    class TaskFactory {
+        +createTask(title, assignee) Task
+        +createRecurringTask(title, interval) Task
+    }
+
     TaskFactory --&gt; Task : creates
-    </pre></section>
+    </pre><p>If task creation rules change — a new required field, a new validation constraint — only <code class="docutils literal notranslate"><span class="pre">TaskFactory</span></code> needs modification. All callers are insulated.</p>
+</section>
 <section id="the-observer-pattern">
-<h4>The Observer Pattern<a class="headerlink" href="#the-observer-pattern" title="Link to this heading"></a></h4>
-<p>Separates event producers from event consumers. A component announces that something happened; other components decide independently what to do about it.</p>
+<h4>§4.3 The Observer Pattern<a class="headerlink" href="#the-observer-pattern" title="Link to this heading"></a></h4>
+<p>The Observer pattern defines a one-to-many dependency where a publisher notifies a set of subscribers when an event occurs, without knowing anything about them specifically.</p>
 <pre  class="mermaid">
         classDiagram
     class TaskEventPublisher {
-        +onTaskOverdue(Task)
+        +subscribe(event, handler)
+        +publish(event, Task)
     }
     class NotificationService {
-        +handleOverdueEvent(Task)
+        +onTaskOverdue(Task)
     }
     class AuditLogger {
-        +handleOverdueEvent(Task)
+        +onTaskOverdue(Task)
     }
+    class TaskMetrics {
+        +onTaskCompleted(Task)
+    }
+
     TaskEventPublisher --&gt; NotificationService : notifies
     TaskEventPublisher --&gt; AuditLogger : notifies
-    </pre></section>
+    TaskEventPublisher --&gt; TaskMetrics : notifies
+    </pre><p>When <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code> publishes a <code class="docutils literal notranslate"><span class="pre">task.overdue</span></code> event, every subscribed observer handles it independently. Adding a new observer (<code class="docutils literal notranslate"><span class="pre">SlackNotifier</span></code>, <code class="docutils literal notranslate"><span class="pre">BillingService</span></code>) requires no changes to the publisher or to any existing observer.</p>
 </section>
-<section id="id9">
-<h3>Formative Check-in<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>Before reading on: In the three patterns above, which one would you use if the team wanted to store tasks in a database? Which would you use if the team needed to send both an email and a Slack message when a task becomes overdue?</p>
-</div>
 </section>
 </section>
 <hr class="docutils" />
@@ -861,20 +960,28 @@ Tight coupling often appears as a shortcut. Directly instantiating a dependency 
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Separation of concerns</p></td>
-<td><p>Each component should have one clearly defined responsibility</p></td>
-<td><p>Prevents components from becoming brittle and hard to change</p></td>
+<td><p>Each component should have one reason to change</p></td>
+<td><p>Changes to one concern do not break others</p></td>
 </tr>
 <tr class="row-odd"><td><p>Coupling</p></td>
-<td><p>The degree to which one component depends directly on another</p></td>
-<td><p>Loosely coupled components can be changed and tested independently</p></td>
+<td><p>The degree of dependency between components</p></td>
+<td><p>Tight coupling makes every change risky</p></td>
 </tr>
 <tr class="row-even"><td><p>Cohesion</p></td>
-<td><p>How focused and related the responsibilities within a component are</p></td>
-<td><p>Highly cohesive components are easier to understand, test, and reuse</p></td>
+<td><p>The degree to which a component’s internals belong together</p></td>
+<td><p>Low cohesion makes components hard to understand and maintain</p></td>
 </tr>
-<tr class="row-odd"><td><p>Design patterns</p></td>
-<td><p>Named, recurring solutions to common structural problems</p></td>
-<td><p>Allow you to recognise and communicate architectural intent quickly</p></td>
+<tr class="row-odd"><td><p>Repository pattern</p></td>
+<td><p>Abstracts data access behind a stable interface</p></td>
+<td><p>The rest of the system is insulated from storage decisions</p></td>
+</tr>
+<tr class="row-even"><td><p>Factory pattern</p></td>
+<td><p>Delegates object construction to a dedicated component</p></td>
+<td><p>Callers are decoupled from construction rules</p></td>
+</tr>
+<tr class="row-odd"><td><p>Observer pattern</p></td>
+<td><p>A publisher notifies subscribers without knowing who they are</p></td>
+<td><p>New consumers can be added without touching the publisher</p></td>
 </tr>
 </tbody>
 </table>
@@ -885,17 +992,34 @@ Tight coupling often appears as a shortcut. Directly instantiating a dependency 
 <section id="recall">
 <h3>Recall<a class="headerlink" href="#recall" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
-<li><p>What is the difference between tight coupling and loose coupling? <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code></p></li>
-<li><p>Define cohesion in your own words. <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code></p></li>
+<li><p>What is the difference between coupling and cohesion? <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code></p></li>
+<li><p>In the separated Task Management System design from §1, which component is responsible for database operations? <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code></p></li>
 </ol>
 </section>
 <section id="application">
 <h3>Application<a class="headerlink" href="#application" title="Link to this heading"></a></h3>
 <ol class="arabic simple" start="3">
-<li><p>Look at the <code class="docutils literal notranslate"><span class="pre">TaskUtilities</span></code> diagram in <a class="reference internal" href="#3"><span class="xref myst">§3</span></a>. Identify at least three distinct concerns that have been grouped together inappropriately, and name what component each concern belongs in. <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
-<li><p>In the loosely coupled <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> diagram in <a class="reference internal" href="#2"><span class="xref myst">§2</span></a>, what changes when the team switches from one database to another? What stays the same? Why does this design make the switch cheaper? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
-<li><p>Look at the three pattern diagrams in <a class="reference internal" href="#4"><span class="xref myst">§4</span></a>. For the Observer pattern: what would happen to <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> and <code class="docutils literal notranslate"><span class="pre">AuditLogger</span></code> if the team added a third consumer — say, a <code class="docutils literal notranslate"><span class="pre">MetricsDashboard</span></code> — that also needs to react when a task becomes overdue? How does the Observer pattern make this addition easier than if all three consumers were hardcoded inside a single component? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+<li><p>The diagram below shows a <code class="docutils literal notranslate"><span class="pre">ProjectService</span></code> component. Identify <strong>two</strong> specific violations of separation of concerns or low cohesion visible in its method list, and explain why each is a violation. <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
 </ol>
+<pre  class="mermaid">
+        classDiagram
+    class ProjectService {
+        +createProject(name)
+        +deleteProject(id)
+        +formatProjectForPDF(Project)
+        +sendProjectDeadlineEmail(Project)
+        +findProjectById(id)
+    }
+    </pre><ol class="arabic simple" start="4">
+<li><p>A developer argues: “Tight coupling is fine for internal components that are never exposed outside the module — nobody can depend on their internals if they can’t see them.” Evaluate this argument. Do you agree or disagree? Justify your position with reference to at least one concept from this lesson. <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+</ol>
+</section>
+<section id="prediction">
+<h3>Prediction<a class="headerlink" href="#prediction" title="Link to this heading"></a></h3>
+<ol class="arabic simple" start="5">
+<li><p>Using the Observer diagram in §4.3, if the team adds a new <code class="docutils literal notranslate"><span class="pre">BillingService</span></code> observer that charges users when a task becomes overdue — how many lines of the <em>existing</em> <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code> code need to change? What does your answer reveal about the Observer pattern’s coupling properties? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+</ol>
+<hr class="docutils" />
 <details>
 <summary>📋 Memorandum — check your answers here</summary>
 <div class="admonition caution">
@@ -906,8 +1030,17 @@ Self-marking without attempting is not self-marking — it is reading.</p>
 <hr class="docutils" />
 <p><strong>1. Question 1 — Recall (2 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code></p>
 <p><strong>Correct answer:</strong>
-Tight coupling means a component has direct, internal knowledge of another specific component — changes to one often require changes to the other. Loose coupling means components depend on abstractions rather than concrete implementations, so each can change independently.</p>
-<p><strong>Source:</strong> L02 §2 — “Coupling: Measuring Interdependence”</p>
+Coupling measures the degree of dependency <em>between</em> components — how much Component A relies on Component B. Cohesion measures how well the elements <em>within</em> a single component belong together. They measure opposite directions: coupling is external, cohesion is internal.</p>
+<p><strong>Source:</strong> L02 §2 — “Coupling”; L02 §3 — “Cohesion”</p>
+<p><strong>Acceptable variations:</strong></p>
+<ul class="simple">
+<li><p>“Coupling is about relationships between components; cohesion is about what is inside a component.”</p></li>
+<li><p>“Coupling = external dependencies; cohesion = internal relatedness.”</p></li>
+</ul>
+<p><strong>Partial credit (1 mark):</strong></p>
+<ul class="simple">
+<li><p>Defines one concept correctly but confuses or omits the other.</p></li>
+</ul>
 <p><strong>Common mistakes:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -917,23 +1050,51 @@ Tight coupling means a component has direct, internal knowledge of another speci
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Saying tight coupling is always bad</p></td>
-<td><p>Some coupling is unavoidable and necessary — every component must depend on <em>something</em>. The goal is minimising coupling to concrete implementations.</p></td>
-<td><p>Suggests misunderstanding of nuance — revisit L02 §2</p></td>
+<tr class="row-even"><td><p>Treating coupling and cohesion as synonyms</p></td>
+<td><p>They measure opposite directions — between vs within</p></td>
+<td><p>Suggests misunderstanding of architectural metrics — revisit L02 §2 and §3</p></td>
 </tr>
-<tr class="row-odd"><td><p>Confusing coupling with cohesion</p></td>
-<td><p>Coupling is about <em>between</em> components. Cohesion is about <em>within</em> a component.</p></td>
-<td><p>Very common conflation — revisit L02 §2 and §3 side by side</p></td>
+<tr class="row-odd"><td><p>Saying coupling is “bad” and cohesion is “good” without qualification</p></td>
+<td><p>Some coupling is unavoidable; the goal is <em>loose</em> coupling. The problem is <em>low</em> cohesion, not cohesion itself</p></td>
+<td><p>Suggests oversimplification — revisit the four-cell matrix in L02 §3</p></td>
 </tr>
 </tbody>
 </table>
 <hr class="docutils" />
 <p><strong>2. Question 2 — Recall (1 mark)</strong> <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code></p>
 <p><strong>Correct answer:</strong>
-Cohesion measures how closely related and focused the responsibilities within a single component are. High cohesion means a component does one thing well.</p>
-<p><strong>Source:</strong> L02 §3 — “Cohesion: Measuring Focus”</p>
+<code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code></p>
+<p><strong>Source:</strong> L02 §1 — “Separation of Concerns” (separated design diagram)</p>
+<p><strong>Common mistakes:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mistake</p></th>
+<th class="head"><p>Why it is wrong</p></th>
+<th class="head"><p>Diagnostic note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Answering <code class="docutils literal notranslate"><span class="pre">Task</span></code></p></td>
+<td><p>In the separated design, <code class="docutils literal notranslate"><span class="pre">Task</span></code> is pure data with no persistence methods</p></td>
+<td><p>Suggests confusion between the god class and the separated design — revisit the two diagrams in L02 §1 side by side</p></td>
+</tr>
+<tr class="row-odd"><td><p>Answering <code class="docutils literal notranslate"><span class="pre">TaskService</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TaskService</span></code> contains business logic; <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> handles persistence</p></td>
+<td><p>Suggests misunderstanding of the Repository pattern’s role — revisit L02 §4.1</p></td>
+</tr>
+</tbody>
+</table>
 <hr class="docutils" />
 <p><strong>3. Question 3 — Application (3 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
+<p><strong>Correct answer:</strong>
+Any two of the following, each with explanation:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">formatProjectForPDF(Project)</span></code> — formatting/export is a presentation concern, not a project management concern. This belongs in a dedicated formatter or export component. A change to PDF layout should not require opening <code class="docutils literal notranslate"><span class="pre">ProjectService</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sendProjectDeadlineEmail(Project)</span></code> — external notification is a communication concern. This belongs in a <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code>. A change to how deadlines are communicated should not require modifying the component that manages project lifecycle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">findProjectById(id)</span></code> — data retrieval is a persistence concern. This belongs in a <code class="docutils literal notranslate"><span class="pre">ProjectRepository</span></code>. Mixing data access with business logic reduces cohesion and increases coupling to storage.</p></li>
+</ul>
+<p>Two violations identified and explained earn full marks. Identifying without explaining earns partial credit.</p>
+<p><strong>Source:</strong> L02 §1 — “Separation of Concerns”; L02 §3 — “Cohesion”</p>
 <p><strong>Rubric:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -945,17 +1106,39 @@ Cohesion measures how closely related and focused the responsibilities within a 
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Identifies at least 3 distinct concerns</p></td>
-<td><p>3</p></td>
-<td><p>Correctly names 3+ concerns and the component each belongs in</p></td>
-<td><p>Names concerns without identifying appropriate components</p></td>
-<td><p>Lists methods without identifying them as distinct concerns</p></td>
+<tr class="row-even"><td><p>First violation identified and explained</p></td>
+<td><p>1.5</p></td>
+<td><p>Names a specific method and correctly identifies which concern it violates, with explanation</p></td>
+<td><p>Names the method but explanation is vague or missing</p></td>
+<td><p>No violation identified, or flags a method that legitimately belongs in <code class="docutils literal notranslate"><span class="pre">ProjectService</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Second violation identified and explained</p></td>
+<td><p>1.5</p></td>
+<td><p>Names a second specific method, different from the first, with correct explanation</p></td>
+<td><p>Names the method but explanation is vague</p></td>
+<td><p>No second violation, or repeats the same violation type as the first</p></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Source:</strong> L02 §3 — “Cohesion: Measuring Focus”</p>
-<p><strong>Model answer:</strong>
-<code class="docutils literal notranslate"><span class="pre">TaskUtilities</span></code> mixes four distinct concerns: overdue fee calculation (belongs in <code class="docutils literal notranslate"><span class="pre">FeeCalculator</span></code> — business logic), web display formatting (belongs in <code class="docutils literal notranslate"><span class="pre">TaskFormatter</span></code> — presentation logic), notification sending (belongs in <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> — external communication), and title validation (belongs in <code class="docutils literal notranslate"><span class="pre">TaskValidator</span></code> — data validation). Each should be its own focused component.</p>
+<p><strong>Common mistakes:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mistake</p></th>
+<th class="head"><p>Why it is wrong</p></th>
+<th class="head"><p>Diagnostic note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Flagging <code class="docutils literal notranslate"><span class="pre">createProject</span></code> or <code class="docutils literal notranslate"><span class="pre">deleteProject</span></code> as violations</p></td>
+<td><p>These are core project lifecycle operations — they belong in a <code class="docutils literal notranslate"><span class="pre">ProjectService</span></code></p></td>
+<td><p>Suggests misunderstanding of what a service component’s legitimate concern is — revisit L02 §1 single-responsibility test</p></td>
+</tr>
+<tr class="row-odd"><td><p>Identifying the violation without explaining why</p></td>
+<td><p>Identification alone is BT1; this question requires BT3 reasoning</p></td>
+<td><p>Apply the Single Responsibility Test from L02 §1 to each method explicitly</p></td>
+</tr>
+</tbody>
+</table>
 <hr class="docutils" />
 <p><strong>4. Question 4 — Application (4 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
 <p><strong>Rubric:</strong></p>
@@ -969,25 +1152,49 @@ Cohesion measures how closely related and focused the responsibilities within a 
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Identifies what changes</p></td>
-<td><p>2</p></td>
-<td><p>Correctly states only the connection object passed in changes — the <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> class itself does not need to be modified</p></td>
-<td><p>States the repository must change</p></td>
-<td><p>No answer</p></td>
+<tr class="row-even"><td><p>Takes a clear position</p></td>
+<td><p>1</p></td>
+<td><p>Explicitly agrees or disagrees</p></td>
+<td><p>Position implied but not stated</p></td>
+<td><p>No discernible position</p></td>
 </tr>
-<tr class="row-odd"><td><p>Explains why the design achieves this</p></td>
-<td><p>2</p></td>
-<td><p>Explains that depending on an abstraction (not a concrete type) means the repository is insulated from database-specific implementation details</p></td>
-<td><p>Identifies it is “better” without explaining the mechanism</p></td>
-<td><p>Does not address the architectural reason</p></td>
+<tr class="row-odd"><td><p>Addresses the “can’t see them” premise directly</p></td>
+<td><p>1</p></td>
+<td><p>Correctly identifies that internal visibility does not eliminate the cost of tight coupling — internal dependents still break when internals change</p></td>
+<td><p>Partially addresses the premise</p></td>
+<td><p>Does not engage with the argument as stated</p></td>
+</tr>
+<tr class="row-even"><td><p>Uses lesson concepts accurately</p></td>
+<td><p>1</p></td>
+<td><p>Correctly invokes tight/loose coupling or the interface abstraction concept from §2</p></td>
+<td><p>Invokes a concept but applies it imprecisely</p></td>
+<td><p>No lesson concepts used</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quality of reasoning</p></td>
+<td><p>1</p></td>
+<td><p>Reasoning is specific and grounded — refers to a concrete consequence of tight coupling, not a general statement</p></td>
+<td><p>Reasoning is present but generic</p></td>
+<td><p>No reasoning present</p></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Source:</strong> L02 §2 — “Coupling: Measuring Interdependence”</p>
-<p><strong>Model answer:</strong>
-Only the connection object that is <em>passed in</em> to <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> changes — from a MySQL connection to a PostgreSQL connection. The <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> class itself does not need to be touched. This works because <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> depends on an abstract connection interface, not on a specific database library. Depending on an abstraction rather than a concrete implementation is what makes the component loosely coupled.</p>
+<p><strong>Source:</strong> L02 §2 — “Coupling”</p>
+<p><strong>Anchor examples:</strong></p>
+<ul class="simple">
+<li><p><strong>Strong answer (4/4):</strong> I disagree. The argument assumes tight coupling only creates problems at module boundaries, but internal components depend on each other too. If <code class="docutils literal notranslate"><span class="pre">TaskService</span></code> calls directly into <code class="docutils literal notranslate"><span class="pre">MySQLDatabase</span></code> rather than through <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code>, swapping the database requires changing <code class="docutils literal notranslate"><span class="pre">TaskService</span></code> — even though both are internal. Tight coupling within a module means internal changes still propagate to internal dependents. Loose coupling through a stable interface protects you from change <em>wherever</em> that change originates.</p></li>
+<li><p><strong>Adequate answer (2–3/4):</strong> I disagree because tight coupling makes things hard to change even inside a module. If the database format changes you still have to fix the service.</p></li>
+<li><p><strong>Weak answer (0–1/4):</strong> I disagree because tight coupling is always bad.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This question assesses quality of reasoning, not correctness of conclusion. A well-argued case for agreement — the developer’s argument has narrow merit in genuinely self-contained utility functions — earns full marks if the reasoning is rigorous.</p>
+</div>
 <hr class="docutils" />
-<p><strong>5. Question 5 — Application (3 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
+<p><strong>5. Question 5 — Prediction (3 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
+<p><strong>Correct answer:</strong>
+Zero lines of the existing <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code> code need to change. <code class="docutils literal notranslate"><span class="pre">BillingService</span></code> calls <code class="docutils literal notranslate"><span class="pre">publisher.subscribe('task.overdue',</span> <span class="pre">billingService.onTaskOverdue)</span></code> from its own setup code — the publisher is unmodified.</p>
+<p>This demonstrates the Observer pattern’s core decoupling property: the publisher does not maintain a hardcoded list of its subscribers. New observers register themselves through the stable <code class="docutils literal notranslate"><span class="pre">subscribe()</span></code> interface. The publisher’s internal implementation is completely insulated from the growth of its subscriber list.</p>
+<p><strong>Source:</strong> L02 §4.3 — “The Observer Pattern”</p>
 <p><strong>Rubric:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -999,23 +1206,45 @@ Only the connection object that is <em>passed in</em> to <code class="docutils l
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Identifies that existing consumers are unaffected</p></td>
+<tr class="row-even"><td><p>Correct prediction: zero lines change in publisher</p></td>
 <td><p>1</p></td>
-<td><p>States that <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> and <code class="docutils literal notranslate"><span class="pre">AuditLogger</span></code> need no changes</p></td>
-<td><p>Implies they don’t change but doesn’t state it clearly</p></td>
-<td><p>Says all components must change</p></td>
+<td><p>States zero lines of <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code> change</p></td>
+<td><p>States “very few” or “only one line”</p></td>
+<td><p>States multiple publisher changes are needed</p></td>
 </tr>
-<tr class="row-odd"><td><p>Explains the mechanism</p></td>
-<td><p>2</p></td>
-<td><p>Explains that <code class="docutils literal notranslate"><span class="pre">MetricsDashboard</span></code> simply registers itself as a new consumer of <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code> — the publisher does not need to know about it in advance</p></td>
-<td><p>Notes that adding is “easy” without explaining why</p></td>
-<td><p>No architectural explanation</p></td>
+<tr class="row-odd"><td><p>Explains why no change is needed</p></td>
+<td><p>1</p></td>
+<td><p>Identifies that <code class="docutils literal notranslate"><span class="pre">subscribe()</span></code> absorbs new subscribers without requiring publisher modification</p></td>
+<td><p>Implies the pattern supports this but does not explain the mechanism</p></td>
+<td><p>No explanation</p></td>
+</tr>
+<tr class="row-even"><td><p>Names the coupling implication</p></td>
+<td><p>1</p></td>
+<td><p>Connects the answer to loose coupling — the publisher does not know or depend on its specific subscribers</p></td>
+<td><p>Partial connection to lesson concepts</p></td>
+<td><p>No connection</p></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Source:</strong> L02 §4 — “Design Patterns: Named Solutions”</p>
-<p><strong>Model answer:</strong>
-<code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> and <code class="docutils literal notranslate"><span class="pre">AuditLogger</span></code> need no changes at all. <code class="docutils literal notranslate"><span class="pre">MetricsDashboard</span></code> is simply added as a third consumer that listens to <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code>. The publisher does not need to know who is listening — it just announces the event. If the three consumers were hardcoded inside a single component instead (“when a task is overdue, do A, B, and C”), adding a fourth consumer would require modifying that component, risking breakage of the existing three.</p>
+<p><strong>Wrong prediction mapping:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>If you predicted…</p></th>
+<th class="head"><p>This suggests a misunderstanding of…</p></th>
+<th class="head"><p>Revisit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>“One line — add BillingService to the publisher’s list”</p></td>
+<td><p>The Observer’s registration mechanism — subscribers register themselves, the publisher does not hardcode its list</p></td>
+<td><p>L02 §4.3 — “The Observer Pattern”</p></td>
+</tr>
+<tr class="row-odd"><td><p>“Multiple lines — the publisher must be updated to know about BillingService”</p></td>
+<td><p>The purpose of loose coupling — the publisher must not depend on the identity of its subscribers</p></td>
+<td><p>L02 §2 — “Coupling” and §4.3</p></td>
+</tr>
+</tbody>
+</table>
 <hr class="docutils" />
 <p><strong>Your score: ___ / 13 marks</strong>
 <strong>Suggested threshold: 9 marks before proceeding</strong></p>
@@ -1028,19 +1257,20 @@ Only the connection object that is <em>passed in</em> to <code class="docutils l
 <h2>Key Terms<a class="headerlink" href="#key-terms" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><strong>separation of concerns</strong>: The principle that each component should have one clearly defined responsibility, with minimal overlap into the responsibilities of others</p></li>
-<li><p><strong>coupling</strong>: The degree to which one component depends directly on another</p></li>
-<li><p><strong>cohesion</strong>: How closely related and focused the responsibilities within a single component are</p></li>
-<li><p><strong>dependency injection</strong>: Providing a component’s dependencies from outside rather than creating them internally — the primary technique for reducing coupling</p></li>
-<li><p><strong>design pattern</strong>: A named, reusable solution to a commonly recurring structural problem in software architecture<a class="footnote-reference brackets" href="#id14" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></li>
-<li><p><strong>Repository pattern</strong>: Separates data persistence logic from the rest of the application</p></li>
-<li><p><strong>Factory pattern</strong>: Separates object creation logic from the rest of the application</p></li>
-<li><p><strong>Observer pattern</strong>: Separates event producers from event consumers, allowing multiple consumers to react independently</p></li>
+<li><p><strong>coupling</strong>: The degree to which one component depends on another</p></li>
+<li><p><strong>loose coupling</strong>: A design where components depend on stable interfaces rather than concrete implementations — changes to one component’s internals do not propagate to its dependents</p></li>
+<li><p><strong>cohesion</strong>: The degree to which the elements within a single component belong together</p></li>
+<li><p><strong>high cohesion</strong>: A design where all elements in a component serve one unified purpose</p></li>
+<li><p><strong>module boundary</strong>: The defined interface between two components — the only surface through which they should communicate</p></li>
+<li><p><strong>Repository pattern</strong>: A structural pattern that abstracts all data access behind a consistent interface, insulating the rest of the system from storage decisions</p></li>
+<li><p><strong>Factory pattern</strong>: A creational pattern where a dedicated component is responsible for building objects, decoupling callers from construction rules</p></li>
+<li><p><strong>Observer pattern</strong>: A behavioural pattern where a publisher notifies subscribers of events without knowing who those subscribers are</p></li>
 </ul>
 </section>
 <hr class="docutils" />
 <section id="what-s-next">
 <h2>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading"></a></h2>
-<p>In <a class="reference internal" href="L03.html"><span class="std std-doc">Lesson 3</span></a>, we will apply these principles to model the task management system using professional diagramming tools. We will introduce the <strong>C4 model</strong> — a four-level system for describing architecture from the big picture down to individual components — and learn how to produce diagrams that communicate structure at the right level of detail for the right audience.</p>
+<p>You now have a vocabulary for describing and measuring system structure. The next step is to <em>visualise</em> that structure — to produce documents that communicate architectural decisions to a team, a future maintainer, or yourself six months from now. In <a class="reference internal" href="L03.html"><span class="std std-doc">Lesson 3</span></a>, we introduce the C4 model and PlantUML: the tools this course uses to draw architecture diagrams with precision.</p>
 </section>
 <hr class="docutils" />
 <section id="references">
@@ -1049,22 +1279,18 @@ Only the connection object that is <em>passed in</em> to <code class="docutils l
 </section>
 <hr class="footnotes docutils" />
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id11" role="doc-footnote">
+<aside class="footnote brackets" id="id9" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
 <p>Dijkstra, Edsger W. “On the Role of Scientific Thought.” <em>Selected Writings on Computing</em>, 1982.</p>
 </aside>
-<aside class="footnote brackets" id="id12" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id4">1</a>,<a role="doc-backlink" href="#id6">2</a>)</span>
 <p>Yourdon, Edward and Constantine, Larry L. <em>Structured Design</em>. Prentice-Hall, 1979.</p>
 </aside>
-<aside class="footnote brackets" id="id13" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">3</a><span class="fn-bracket">]</span></span>
-<p>Yourdon, Edward and Constantine, Larry L. <em>Structured Design</em>. Prentice-Hall, 1979.</p>
-</aside>
-<aside class="footnote brackets" id="id14" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
-<span class="backrefs">(<a role="doc-backlink" href="#id8">1</a>,<a role="doc-backlink" href="#id10">2</a>)</span>
-<p>Gamma, Erich et al. <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley, 1994.</p>
+<aside class="footnote brackets" id="id11" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">3</a><span class="fn-bracket">]</span></span>
+<p>Gamma, Erich; Helm, Richard; Johnson, Ralph; Vlissides, John. <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley, 1994.</p>
 </aside>
 </aside>
 
