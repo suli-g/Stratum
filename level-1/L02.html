@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson L02 — Architectural Thinking: Context &mdash; Stratum 1.0 documentation</title>
+  <title>Lesson 2 — Separation of Concerns, Coupling &amp; Cohesion &mdash; Stratum 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -16,6 +16,442 @@
       <script src="../_static/documentation_options.js?v=f2a433a1"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -92,9 +528,20 @@
 <li class="toctree-l4"><a class="reference internal" href="L01.html#references">References</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Lesson L02 — Architectural Thinking: Context</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Lesson 2 — Separation of Concerns, Coupling &amp; Cohesion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#recap">Recap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#preamble">Preamble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#outcomes">Outcomes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">§1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">§2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">§3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">§4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#formative-assessment">Formative Assessment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-terms">Key Terms</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#what-s-next">What’s Next</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="L03.html">Lesson L03 — C4 &amp; UML Primer</a><ul>
@@ -172,7 +619,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Level 1 — Foundations</a></li>
-      <li class="breadcrumb-item active">Lesson L02 — Architectural Thinking: Context</li>
+      <li class="breadcrumb-item active">Lesson 2 — Separation of Concerns, Coupling &amp; Cohesion</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/level-1/L02.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -182,21 +629,444 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="lesson-l02-architectural-thinking-context">
-<h1>Lesson L02 — Architectural Thinking: Context<a class="headerlink" href="#lesson-l02-architectural-thinking-context" title="Link to this heading"></a></h1>
-<p>Welcome to Lesson L02. Content pending — stub created to enable navigation.</p>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+  <section id="lesson-2-separation-of-concerns-coupling-cohesion">
+<h1>Lesson 2 — Separation of Concerns, Coupling &amp; Cohesion<a class="headerlink" href="#lesson-2-separation-of-concerns-coupling-cohesion" title="Link to this heading"></a></h1>
+<section id="recap">
+<h2>Recap<a class="headerlink" href="#recap" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Recap — Lesson 1: What Is System Architecture?</strong>
+System architecture is the high-level structure of a software system — its components, their responsibilities, and how they interact.
+Key terms: system architecture, SDLC, technical debt, God class, separation of concerns
+We are building on the distinction between a system that grew organically and one that was deliberately designed, using a Task Management System as our running example.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="preamble">
+<h2>Preamble<a class="headerlink" href="#preamble" title="Link to this heading"></a></h2>
+<p>In Lesson 1, we saw how a system that grows organically becomes brittle and hard to change — the <code class="docutils literal notranslate"><span class="pre">Task</span></code> god class was doing too much, and the cost of any change was unpredictably high. Now we will name the principles that explain <em>why</em> that design failed and <em>what</em> a well-structured alternative looks like.</p>
+<p>By the end of this lesson, you will be able to measure the quality of any component boundary using two concrete metrics — <strong>coupling</strong> and <strong>cohesion</strong> — and you will be able to spot the named design patterns these principles naturally produce.</p>
+</section>
+<hr class="docutils" />
+<section id="outcomes">
+<h2>Outcomes<a class="headerlink" href="#outcomes" title="Link to this heading"></a></h2>
+<p>By the end of this lesson you will be able to:</p>
 <ul class="simple">
-<li><p>Intended learning outcomes: TBA</p></li>
-<li><p>Estimated length: TBA</p></li>
+<li><p>Define separation of concerns and identify violations of it</p></li>
+<li><p>Explain the difference between tight and loose coupling with examples</p></li>
+<li><p>Define cohesion and distinguish high from low cohesion</p></li>
+<li><p>Identify the Factory, Repository, and Observer pattern names in code examples</p></li>
 </ul>
 </section>
+<hr class="docutils" />
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="L01.html"><span class="std std-doc">Lesson 1 — What Is System Architecture?</span></a></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="id1">
+<h2>§1<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="separation-of-concerns">
+<h3>Separation of Concerns<a class="headerlink" href="#separation-of-concerns" title="Link to this heading"></a></h3>
+<p>The principle of <strong>separation of concerns</strong> states that a program should be divided into distinct sections where each section addresses a separate concern.<a class="footnote-reference brackets" href="#id11" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Every component should have one reason to change. When a component mixes concerns, it has multiple reasons to change — and each change risks breaking the others.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>The Single Responsibility Test</strong>
+Try to describe what a component does in a single sentence. If you find yourself using “and” or “also,” the component likely has multiple concerns and should be split.</p>
+</div>
+<p>In Lesson 1 we saw the <code class="docutils literal notranslate"><span class="pre">Task</span></code> god class violate this principle — it handled data storage, web formatting, user assignment, and notifications all at once. The designed version corrected this by giving each responsibility its own component:</p>
+<pre  class="mermaid">
+        classDiagram
+    class Task {
+        +String title
+        +String description
+        +String status
+    }
+    class TaskRepository {
+        +saveToDatabase(Task)
+    }
+    class TaskFormatter {
+        +formatForWebDisplay(Task)
+    }
+    class NotificationService {
+        +sendOverdueNotification(Task)
+    }
+
+    TaskRepository --&gt; Task : stores
+    TaskFormatter --&gt; Task : formats
+    NotificationService --&gt; Task : reads
+    </pre><p>Each component now has exactly one reason to change. If the notification medium changes (email → SMS), only <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> changes. If the database changes, only <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> changes.</p>
+</section>
+<section id="formative-check-in">
+<h3>Formative Check-in<a class="headerlink" href="#formative-check-in" title="Link to this heading"></a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Before reading on: If the team decides to change how tasks are displayed in the browser, which component in the diagram above would need to change? Which components would be completely unaffected?</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id3">
+<h2>§2<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="coupling-measuring-interdependence">
+<h3>Coupling: Measuring Interdependence<a class="headerlink" href="#coupling-measuring-interdependence" title="Link to this heading"></a></h3>
+<p><strong>Coupling</strong> refers to the degree of direct knowledge that one component has of another.<a class="footnote-reference brackets" href="#id12" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> When components are <strong>tightly coupled</strong>, changes to one often require changes to others. When they are <strong>loosely coupled</strong>, components can be modified independently.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Coupling Disguised as Convenience</strong>
+Tight coupling often appears as a shortcut. Directly instantiating a dependency inside a component feels faster — but it binds the two components together permanently, making testing and future changes expensive.</p>
+</div>
+<p>Compare two designs for <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code>. In the first, the repository creates its own database connection:</p>
+<pre  class="mermaid">
+        classDiagram
+    class TaskRepository {
+        -connection : MySQLConnection
+        +TaskRepository()
+        +save(Task)
+    }
+    class MySQLConnection {
+        +connect(host, user, password)
+    }
+    TaskRepository --&gt; MySQLConnection : creates internally
+    </pre><p>In the second, the connection is <em>passed in</em> rather than created:</p>
+<pre  class="mermaid">
+        classDiagram
+    class TaskRepository {
+        -connection : DatabaseConnection
+        +TaskRepository(connection)
+        +save(Task)
+    }
+    class DatabaseConnection {
+        &lt;&lt;interface&gt;&gt;
+        +cursor()
+    }
+    TaskRepository --&gt; DatabaseConnection : depends on abstraction
+    </pre><p>In the loosely coupled design, <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> does not care whether the connection is MySQL, PostgreSQL, or a test fake. It depends on an abstraction, not a concrete implementation. This is called <strong>dependency injection</strong> — the dependency is provided from outside rather than created inside.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h2>§3<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<section id="cohesion-measuring-focus">
+<h3>Cohesion: Measuring Focus<a class="headerlink" href="#cohesion-measuring-focus" title="Link to this heading"></a></h3>
+<p><strong>Cohesion</strong> measures how closely related the responsibilities within a single component are.<a class="footnote-reference brackets" href="#id13" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> <strong>High cohesion</strong> means a component does one thing well. <strong>Low cohesion</strong> means a component tries to do many unrelated things.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>High cohesion and low coupling tend to go together. A component that does one thing well (high cohesion) typically needs fewer dependencies on other components (low coupling).</p>
+</div>
+<p>Consider a catch-all utility component in a task management system:</p>
+<pre  class="mermaid">
+        classDiagram
+    class TaskUtilities {
+        +calculateOverdueFee(Task)
+        +formatForWebDisplay(Task)
+        +sendNotification(Task)
+        +validateTaskTitle(Task)
+    }
+    </pre><p>This component has <strong>low cohesion</strong> — it mixes fee business logic, presentation logic, external communication, and data validation. No single sentence can describe what it does without using “and.”</p>
+<p>The high-cohesion alternative splits each responsibility into its own component:</p>
+<pre  class="mermaid">
+        classDiagram
+    class FeeCalculator {
+        +calculateOverdueFee(Task)
+    }
+    class TaskFormatter {
+        +formatForWebDisplay(Task)
+    }
+    class NotificationService {
+        +sendNotification(Task)
+    }
+    class TaskValidator {
+        +validateTaskTitle(Task)
+    }
+    </pre><p>Each component now has a single, clearly-stated purpose. Each is independently testable and reusable.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id7">
+<h2>§4<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<section id="design-patterns-named-solutions">
+<h3>Design Patterns: Named Solutions<a class="headerlink" href="#design-patterns-named-solutions" title="Link to this heading"></a></h3>
+<p>When separation of concerns, low coupling, and high cohesion are applied consistently, certain structures emerge again and again across codebases. These recurring structures have been catalogued and named — they are called <strong>design patterns</strong>.<a class="footnote-reference brackets" href="#id14" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p>
+<p>You do not need to implement these patterns yet. The goal here is recognition: when you see a pattern in code later in this course, you will know its name and what problem it is solving.</p>
+<section id="the-repository-pattern">
+<h4>The Repository Pattern<a class="headerlink" href="#the-repository-pattern" title="Link to this heading"></a></h4>
+<p>Separates data persistence from business logic. The rest of the application talks to a repository, not directly to a database.</p>
+<pre  class="mermaid">
+        classDiagram
+    class TaskRepository {
+        +save(Task)
+        +findById(id)
+        +findAllOverdue()
+    }
+    class Task {
+        +String title
+        +String status
+    }
+    TaskRepository --&gt; Task : manages
+    </pre></section>
+<section id="the-factory-pattern">
+<h4>The Factory Pattern<a class="headerlink" href="#the-factory-pattern" title="Link to this heading"></a></h4>
+<p>Separates object creation logic from the rest of the application. When constructing an object becomes complex, a factory component owns that complexity.</p>
+<pre  class="mermaid">
+        classDiagram
+    class TaskFactory {
+        +createUrgentTask(title) Task
+        +createScheduledTask(title, dueDate) Task
+    }
+    class Task {
+        +String title
+        +String priority
+        +String status
+    }
+    TaskFactory --&gt; Task : creates
+    </pre></section>
+<section id="the-observer-pattern">
+<h4>The Observer Pattern<a class="headerlink" href="#the-observer-pattern" title="Link to this heading"></a></h4>
+<p>Separates event producers from event consumers. A component announces that something happened; other components decide independently what to do about it.</p>
+<pre  class="mermaid">
+        classDiagram
+    class TaskEventPublisher {
+        +onTaskOverdue(Task)
+    }
+    class NotificationService {
+        +handleOverdueEvent(Task)
+    }
+    class AuditLogger {
+        +handleOverdueEvent(Task)
+    }
+    TaskEventPublisher --&gt; NotificationService : notifies
+    TaskEventPublisher --&gt; AuditLogger : notifies
+    </pre></section>
+</section>
+<section id="id9">
+<h3>Formative Check-in<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Before reading on: In the three patterns above, which one would you use if the team wanted to store tasks in a database? Which would you use if the team needed to send both an email and a Slack message when a task becomes overdue?</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Concept</p></th>
+<th class="head"><p>What you learned</p></th>
+<th class="head"><p>Why it matters</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Separation of concerns</p></td>
+<td><p>Each component should have one clearly defined responsibility</p></td>
+<td><p>Prevents components from becoming brittle and hard to change</p></td>
+</tr>
+<tr class="row-odd"><td><p>Coupling</p></td>
+<td><p>The degree to which one component depends directly on another</p></td>
+<td><p>Loosely coupled components can be changed and tested independently</p></td>
+</tr>
+<tr class="row-even"><td><p>Cohesion</p></td>
+<td><p>How focused and related the responsibilities within a component are</p></td>
+<td><p>Highly cohesive components are easier to understand, test, and reuse</p></td>
+</tr>
+<tr class="row-odd"><td><p>Design patterns</p></td>
+<td><p>Named, recurring solutions to common structural problems</p></td>
+<td><p>Allow you to recognise and communicate architectural intent quickly</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<hr class="docutils" />
+<section id="formative-assessment">
+<h2>Formative Assessment<a class="headerlink" href="#formative-assessment" title="Link to this heading"></a></h2>
+<section id="recall">
+<h3>Recall<a class="headerlink" href="#recall" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>What is the difference between tight coupling and loose coupling? <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code></p></li>
+<li><p>Define cohesion in your own words. <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code></p></li>
+</ol>
+</section>
+<section id="application">
+<h3>Application<a class="headerlink" href="#application" title="Link to this heading"></a></h3>
+<ol class="arabic simple" start="3">
+<li><p>Look at the <code class="docutils literal notranslate"><span class="pre">TaskUtilities</span></code> diagram in <a class="reference internal" href="#3"><span class="xref myst">§3</span></a>. Identify at least three distinct concerns that have been grouped together inappropriately, and name what component each concern belongs in. <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+<li><p>In the loosely coupled <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> diagram in <a class="reference internal" href="#2"><span class="xref myst">§2</span></a>, what changes when the team switches from one database to another? What stays the same? Why does this design make the switch cheaper? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+<li><p>Look at the three pattern diagrams in <a class="reference internal" href="#4"><span class="xref myst">§4</span></a>. For the Observer pattern: what would happen to <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> and <code class="docutils literal notranslate"><span class="pre">AuditLogger</span></code> if the team added a third consumer — say, a <code class="docutils literal notranslate"><span class="pre">MetricsDashboard</span></code> — that also needs to react when a task becomes overdue? How does the Observer pattern make this addition easier than if all three consumers were hardcoded inside a single component? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+</ol>
+<details>
+<summary>📋 Memorandum — check your answers here</summary>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Attempt all questions honestly before opening this memorandum.
+Self-marking without attempting is not self-marking — it is reading.</p>
+</div>
+<hr class="docutils" />
+<p><strong>1. Question 1 — Recall (2 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code></p>
+<p><strong>Correct answer:</strong>
+Tight coupling means a component has direct, internal knowledge of another specific component — changes to one often require changes to the other. Loose coupling means components depend on abstractions rather than concrete implementations, so each can change independently.</p>
+<p><strong>Source:</strong> L02 §2 — “Coupling: Measuring Interdependence”</p>
+<p><strong>Common mistakes:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mistake</p></th>
+<th class="head"><p>Why it is wrong</p></th>
+<th class="head"><p>Diagnostic note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Saying tight coupling is always bad</p></td>
+<td><p>Some coupling is unavoidable and necessary — every component must depend on <em>something</em>. The goal is minimising coupling to concrete implementations.</p></td>
+<td><p>Suggests misunderstanding of nuance — revisit L02 §2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Confusing coupling with cohesion</p></td>
+<td><p>Coupling is about <em>between</em> components. Cohesion is about <em>within</em> a component.</p></td>
+<td><p>Very common conflation — revisit L02 §2 and §3 side by side</p></td>
+</tr>
+</tbody>
+</table>
+<hr class="docutils" />
+<p><strong>2. Question 2 — Recall (1 mark)</strong> <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code></p>
+<p><strong>Correct answer:</strong>
+Cohesion measures how closely related and focused the responsibilities within a single component are. High cohesion means a component does one thing well.</p>
+<p><strong>Source:</strong> L02 §3 — “Cohesion: Measuring Focus”</p>
+<hr class="docutils" />
+<p><strong>3. Question 3 — Application (3 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
+<p><strong>Rubric:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Criterion</p></th>
+<th class="head"><p>Marks</p></th>
+<th class="head"><p>Full marks</p></th>
+<th class="head"><p>Partial marks</p></th>
+<th class="head"><p>No marks</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Identifies at least 3 distinct concerns</p></td>
+<td><p>3</p></td>
+<td><p>Correctly names 3+ concerns and the component each belongs in</p></td>
+<td><p>Names concerns without identifying appropriate components</p></td>
+<td><p>Lists methods without identifying them as distinct concerns</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source:</strong> L02 §3 — “Cohesion: Measuring Focus”</p>
+<p><strong>Model answer:</strong>
+<code class="docutils literal notranslate"><span class="pre">TaskUtilities</span></code> mixes four distinct concerns: overdue fee calculation (belongs in <code class="docutils literal notranslate"><span class="pre">FeeCalculator</span></code> — business logic), web display formatting (belongs in <code class="docutils literal notranslate"><span class="pre">TaskFormatter</span></code> — presentation logic), notification sending (belongs in <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> — external communication), and title validation (belongs in <code class="docutils literal notranslate"><span class="pre">TaskValidator</span></code> — data validation). Each should be its own focused component.</p>
+<hr class="docutils" />
+<p><strong>4. Question 4 — Application (4 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
+<p><strong>Rubric:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Criterion</p></th>
+<th class="head"><p>Marks</p></th>
+<th class="head"><p>Full marks</p></th>
+<th class="head"><p>Partial marks</p></th>
+<th class="head"><p>No marks</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Identifies what changes</p></td>
+<td><p>2</p></td>
+<td><p>Correctly states only the connection object passed in changes — the <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> class itself does not need to be modified</p></td>
+<td><p>States the repository must change</p></td>
+<td><p>No answer</p></td>
+</tr>
+<tr class="row-odd"><td><p>Explains why the design achieves this</p></td>
+<td><p>2</p></td>
+<td><p>Explains that depending on an abstraction (not a concrete type) means the repository is insulated from database-specific implementation details</p></td>
+<td><p>Identifies it is “better” without explaining the mechanism</p></td>
+<td><p>Does not address the architectural reason</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source:</strong> L02 §2 — “Coupling: Measuring Interdependence”</p>
+<p><strong>Model answer:</strong>
+Only the connection object that is <em>passed in</em> to <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> changes — from a MySQL connection to a PostgreSQL connection. The <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> class itself does not need to be touched. This works because <code class="docutils literal notranslate"><span class="pre">TaskRepository</span></code> depends on an abstract connection interface, not on a specific database library. Depending on an abstraction rather than a concrete implementation is what makes the component loosely coupled.</p>
+<hr class="docutils" />
+<p><strong>5. Question 5 — Application (3 marks)</strong> <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p>
+<p><strong>Rubric:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Criterion</p></th>
+<th class="head"><p>Marks</p></th>
+<th class="head"><p>Full marks</p></th>
+<th class="head"><p>Partial marks</p></th>
+<th class="head"><p>No marks</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Identifies that existing consumers are unaffected</p></td>
+<td><p>1</p></td>
+<td><p>States that <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> and <code class="docutils literal notranslate"><span class="pre">AuditLogger</span></code> need no changes</p></td>
+<td><p>Implies they don’t change but doesn’t state it clearly</p></td>
+<td><p>Says all components must change</p></td>
+</tr>
+<tr class="row-odd"><td><p>Explains the mechanism</p></td>
+<td><p>2</p></td>
+<td><p>Explains that <code class="docutils literal notranslate"><span class="pre">MetricsDashboard</span></code> simply registers itself as a new consumer of <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code> — the publisher does not need to know about it in advance</p></td>
+<td><p>Notes that adding is “easy” without explaining why</p></td>
+<td><p>No architectural explanation</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source:</strong> L02 §4 — “Design Patterns: Named Solutions”</p>
+<p><strong>Model answer:</strong>
+<code class="docutils literal notranslate"><span class="pre">NotificationService</span></code> and <code class="docutils literal notranslate"><span class="pre">AuditLogger</span></code> need no changes at all. <code class="docutils literal notranslate"><span class="pre">MetricsDashboard</span></code> is simply added as a third consumer that listens to <code class="docutils literal notranslate"><span class="pre">TaskEventPublisher</span></code>. The publisher does not need to know who is listening — it just announces the event. If the three consumers were hardcoded inside a single component instead (“when a task is overdue, do A, B, and C”), adding a fourth consumer would require modifying that component, risking breakage of the existing three.</p>
+<hr class="docutils" />
+<p><strong>Your score: ___ / 13 marks</strong>
+<strong>Suggested threshold: 9 marks before proceeding</strong></p>
+<p>If you scored below the threshold, review the diagnostic notes above before continuing to Lesson 3.</p>
+</details>
+</section>
+</section>
+<hr class="docutils" />
+<section id="key-terms">
+<h2>Key Terms<a class="headerlink" href="#key-terms" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>separation of concerns</strong>: The principle that each component should have one clearly defined responsibility, with minimal overlap into the responsibilities of others</p></li>
+<li><p><strong>coupling</strong>: The degree to which one component depends directly on another</p></li>
+<li><p><strong>cohesion</strong>: How closely related and focused the responsibilities within a single component are</p></li>
+<li><p><strong>dependency injection</strong>: Providing a component’s dependencies from outside rather than creating them internally — the primary technique for reducing coupling</p></li>
+<li><p><strong>design pattern</strong>: A named, reusable solution to a commonly recurring structural problem in software architecture<a class="footnote-reference brackets" href="#id14" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></li>
+<li><p><strong>Repository pattern</strong>: Separates data persistence logic from the rest of the application</p></li>
+<li><p><strong>Factory pattern</strong>: Separates object creation logic from the rest of the application</p></li>
+<li><p><strong>Observer pattern</strong>: Separates event producers from event consumers, allowing multiple consumers to react independently</p></li>
+</ul>
+</section>
+<hr class="docutils" />
 <section id="what-s-next">
 <h2>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading"></a></h2>
-<p>Continue with the Level 1 roadmap.</p>
+<p>In <a class="reference internal" href="L03.html"><span class="std std-doc">Lesson 3</span></a>, we will apply these principles to model the task management system using professional diagramming tools. We will introduce the <strong>C4 model</strong> — a four-level system for describing architecture from the big picture down to individual components — and learn how to produce diagrams that communicate structure at the right level of detail for the right audience.</p>
+</section>
+<hr class="docutils" />
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
 </section>
 </section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id11" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p>Dijkstra, Edsger W. “On the Role of Scientific Thought.” <em>Selected Writings on Computing</em>, 1982.</p>
+</aside>
+<aside class="footnote brackets" id="id12" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<p>Yourdon, Edward and Constantine, Larry L. <em>Structured Design</em>. Prentice-Hall, 1979.</p>
+</aside>
+<aside class="footnote brackets" id="id13" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">3</a><span class="fn-bracket">]</span></span>
+<p>Yourdon, Edward and Constantine, Larry L. <em>Structured Design</em>. Prentice-Hall, 1979.</p>
+</aside>
+<aside class="footnote brackets" id="id14" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id8">1</a>,<a role="doc-backlink" href="#id10">2</a>)</span>
+<p>Gamma, Erich et al. <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley, 1994.</p>
+</aside>
+</aside>
 
 
            </div>
