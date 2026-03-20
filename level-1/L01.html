@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>§4.2 The System That Was Designed (Separated Concerns) &mdash; Stratum 1.0 documentation</title>
+  <title>Lesson 1 — What Is System Architecture? &mdash; Stratum 1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -114,7 +114,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">§4.2 The System That Was Designed (Separated Concerns)</li>
+      <li class="breadcrumb-item active">Lesson 1 — What Is System Architecture?</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/level-1/L01.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -124,110 +124,103 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>Here is the complete Markdown file for Lesson 1, written strictly according to the Stratum Blueprint’s pedagogical rules, section numbering requirements, and your newly authorized MyST admonition syntax.</p>
-<p>You can copy the code block below and save it directly as <code class="docutils literal notranslate"><span class="pre">L01.md</span></code>.</p>
-<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Lesson 1 — What Is System Architecture?</span>
-
-<span class="gu">### Level 1 — Foundations | Module — Foundations</span>
-
----
-
-<span class="gu">## Preamble</span>
-
-Think of a codebase you have worked in that was genuinely hard to understand. Every time you added a feature, something seemingly unrelated broke. The code felt brittle, finding where a specific bug lived took hours, and nobody on the team felt confident making large changes. That friction is not a failure of coding ability; it is a failure of system architecture.
-
-In this course, you are going to build a full-stack framework called Stratum. But before you write a single line of code, you need to understand how to design the system that code will live in. By the end of this lesson, you will be able to distinguish between a system that grew organically and one that was deliberately designed, and you will meet the library system we will use to ground these concepts.
-
----
-
-<span class="gu">## Outcomes</span>
-
-By the end of this lesson you will be able to:
-
-<span class="k">-</span><span class="w"> </span>Define system architecture and explain why it matters before writing code
-<span class="k">-</span><span class="w"> </span>Identify the software development lifecycle and where architecture sits within it
-<span class="k">-</span><span class="w"> </span>Describe the difference between a system that grew and a system that was designed
-<span class="k">-</span><span class="w"> </span>Recognise the library example system that will be used throughout Level 1
-
----
-
-<span class="gu">## Prerequisites</span>
-
-<span class="k">-</span><span class="w"> </span>None — but read <span class="sb">`BEFORE_YOU_BEGIN.md`</span>
-
----
-
-<span class="gu">## §1</span>
-
-<span class="gu">### What is System Architecture?</span>
-
-When developers talk about building an application, they often jump straight to technology choices: &quot;We are using React for the frontend and Django for the backend.&quot;
-
-While important, technology choices are not architecture. <span class="gs">**System architecture**</span> is the high-level structure of a software system—the components it is made of, the specific responsibilities of each component, and the rules governing how those components interact. Architecture is about boundaries and communication.
-
-:::{important}
-System architecture is the set of fundamental design decisions about a software system. If a decision is difficult to change later, it is architectural.
-:::
-
-<span class="gu">## §2</span>
-
-<span class="gu">### The SDLC and Technical Debt</span>
-
-Architecture does not happen in a vacuum. It is a specific phase within the <span class="gs">**Software Development Lifecycle (SDLC)**</span>. The SDLC describes the phases a project moves through: Requirements → Design (Architecture) → Implementation (Coding) → Testing → Deployment → Maintenance.
-
-Skipping the design phase inevitably leads to <span class="gs">**technical debt**</span>. Note that technical debt is not the same as a bug. A bug is code that does not work. Technical debt is code that <span class="ge">_does_</span> work, but was written in a way that makes future changes expensive and slow.
-
-:::{note}
-<span class="gs">**The SDLC in practice**</span>
-While the SDLC is often taught as a linear &quot;waterfall,&quot; modern teams iterate through these phases continuously. However, even in Agile environments, the <span class="ge">_order_</span> of the phases within a cycle matters. You cannot implement what you have not designed.
-:::
-
-<span class="gu">## §3</span>
-
-<span class="gu">### UML Primer: Reading Structural Diagrams</span>
-
-Throughout this course, we prioritize visualising structure before writing code. We use Unified Modeling Language (UML) and similar diagramming tools to represent concepts. Before we look at our first system design, you need to understand the notation.
-
-In this lesson, we use <span class="gs">**Mermaid class diagrams**</span>.
-
-<span class="k">-</span><span class="w"> </span>A <span class="gs">**box**</span> represents a discrete component or class.
-<span class="k">-</span><span class="w"> </span>The <span class="gs">**top section**</span> of the box is the name of the component.
-<span class="k">-</span><span class="w"> </span>The <span class="gs">**middle section**</span> lists its attributes (the data it holds).
-<span class="k">-</span><span class="w"> </span>The <span class="gs">**bottom section**</span> lists its methods (the actions it can perform).
-<span class="k">-</span><span class="w"> </span><span class="gs">**Arrows**</span> between boxes show relationships and dependencies (e.g., Component A calls Component B).
-
-As we progress through Level 1, we will introduce richer C4 and PlantUML diagrams for higher-level system mapping.
-
-<span class="gu">## §4</span>
-
-<span class="gu">### Systems That Grow vs. Systems That Are Designed</span>
-
-To see the impact of architectural decisions, we will use a simple, familiar example throughout Level 1: a <span class="gs">**Public Library Management System**</span>.
-
-The system needs to manage books, patrons, and the checkout process. Let&#39;s look at what happens when a system is coded directly from requirements without an architectural design phase, versus when it is deliberately structured.
-
-<span class="gu">#### §4.1 The System That Grew (The God Class)</span>
-
-When developers just start typing, they tend to group everything related to a noun into a single place. The result is a &quot;God class&quot;—a single component doing far too much.
-
-<span class="sb">```mermaid</span>
-<span class="s">classDiagram</span>
-<span class="s">    class Book {</span>
-<span class="s">        +String title</span>
-<span class="s">        +String author</span>
-<span class="s">        +String isbn</span>
-<span class="s">        +saveToDatabase()</span>
-<span class="s">        +formatForWebDisplay()</span>
-<span class="s">        +sendOverdueEmail()</span>
-<span class="s">        +calculateLateFees()</span>
-<span class="s">    }</span>
-<span class="sb">```</span>
+  <section id="lesson-1-what-is-system-architecture">
+<h1>Lesson 1 — What Is System Architecture?<a class="headerlink" href="#lesson-1-what-is-system-architecture" title="Link to this heading"></a></h1>
+<section id="level-1-foundations-module-foundations">
+<h2>Level 1 — Foundations | Module — Foundations<a class="headerlink" href="#level-1-foundations-module-foundations" title="Link to this heading"></a></h2>
+</section>
+<hr class="docutils" />
+<section id="preamble">
+<h2>Preamble<a class="headerlink" href="#preamble" title="Link to this heading"></a></h2>
+<p>Think of a codebase you have worked in that was genuinely hard to understand. Every time you added a feature, something seemingly unrelated broke. The code felt brittle, finding where a specific bug lived took hours, and nobody on the team felt confident making large changes. That friction is not a failure of coding ability; it is a failure of system architecture.</p>
+<p>In this course, you are going to build a full-stack framework called Stratum. But before you write a single line of code, you need to understand how to design the system that code will live in. By the end of this lesson, you will be able to distinguish between a system that grew organically and one that was deliberately designed, and you will meet the library system we will use to ground these concepts.</p>
+</section>
+<hr class="docutils" />
+<section id="outcomes">
+<h2>Outcomes<a class="headerlink" href="#outcomes" title="Link to this heading"></a></h2>
+<p>By the end of this lesson you will be able to:</p>
+<ul class="simple">
+<li><p>Define system architecture and explain why it matters before writing code</p></li>
+<li><p>Identify the software development lifecycle and where architecture sits within it</p></li>
+<li><p>Describe the difference between a system that grew and a system that was designed</p></li>
+<li><p>Recognise the library example system that will be used throughout Level 1</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>None — but read <a class="reference internal" href="#./BEFORE_YOU_BEGIN.md"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">BEFORE_YOU_BEGIN.md</span></code></span></a></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="id1">
+<h2>§1<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="what-is-system-architecture">
+<h3>What is System Architecture?<a class="headerlink" href="#what-is-system-architecture" title="Link to this heading"></a></h3>
+<p>When developers talk about building an application, they often jump straight to technology choices: “We are using React for the frontend and Django for the backend.”</p>
+<p>While important, technology choices are not architecture. <strong>System architecture</strong> is the high-level structure of a software system—the components it is made of, the specific responsibilities of each component, and the rules governing how those components interact.<a class="footnote-reference brackets" href="#id10" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> Architecture is about boundaries and communication.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>System architecture is the set of fundamental design decisions about a software system. If a decision is difficult to change later, it is architectural.</p>
+</div>
+</section>
+</section>
+<section id="id3">
+<h2>§2<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<section id="the-sdlc-and-technical-debt">
+<h3>The SDLC and Technical Debt<a class="headerlink" href="#the-sdlc-and-technical-debt" title="Link to this heading"></a></h3>
+<p>Architecture does not happen in a vacuum. It is a specific phase within the <strong>Software Development Lifecycle (SDLC)</strong>.<a href="#id11"><span class="problematic" id="id4">[^2]</span></a> The SDLC describes the phases a project moves through: Requirements → Design (Architecture) → Implementation (Coding) → Testing → Deployment → Maintenance.</p>
+<p>Skipping the design phase inevitably leads to <strong>technical debt</strong>.<a href="#id12"><span class="problematic" id="id5">[^3]</span></a> Note that technical debt is not the same as a bug. A bug is code that does not work. Technical debt is code that <em>does</em> work, but was written in a way that makes future changes expensive and slow.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>The SDLC in practice</strong>
+While the SDLC is often taught as a linear “waterfall,” modern teams iterate through these phases continuously. However, even in Agile environments, the <em>order</em> of the phases within a cycle matters. You cannot implement what you have not designed.</p>
+</div>
+</section>
+</section>
+<section id="id6">
+<h2>§3<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<section id="uml-primer-reading-structural-diagrams">
+<h3>UML Primer: Reading Structural Diagrams<a class="headerlink" href="#uml-primer-reading-structural-diagrams" title="Link to this heading"></a></h3>
+<p>Throughout this course, we prioritize visualising structure before writing code. We use Unified Modeling Language (UML) and similar diagramming tools to represent concepts. Before we look at our first system design, you need to understand the notation.</p>
+<p>In this lesson, we use <strong>Mermaid class diagrams</strong>.</p>
+<ul class="simple">
+<li><p>A <strong>box</strong> represents a discrete component or class.</p></li>
+<li><p>The <strong>top section</strong> of the box is the name of the component.</p></li>
+<li><p>The <strong>middle section</strong> lists its attributes (the data it holds).</p></li>
+<li><p>The <strong>bottom section</strong> lists its methods (the actions it can perform).</p></li>
+<li><p><strong>Arrows</strong> between boxes show relationships and dependencies (e.g., Component A calls Component B).</p></li>
+</ul>
+<p>As we progress through Level 1, we will introduce richer C4 and PlantUML diagrams for higher-level system mapping.</p>
+</section>
+</section>
+<section id="id7">
+<h2>§4<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<section id="systems-that-grow-vs-systems-that-are-designed">
+<h3>Systems That Grow vs. Systems That Are Designed<a class="headerlink" href="#systems-that-grow-vs-systems-that-are-designed" title="Link to this heading"></a></h3>
+<p>To see the impact of architectural decisions, we will use a simple, familiar example throughout Level 1: a <strong>Public Library Management System</strong>.</p>
+<p>The system needs to manage books, patrons, and the checkout process. Let’s look at what happens when a system is coded directly from requirements without an architectural design phase, versus when it is deliberately structured.</p>
+<section id="the-system-that-grew-the-god-class">
+<h4>§4.1 The System That Grew (The God Class)<a class="headerlink" href="#the-system-that-grew-the-god-class" title="Link to this heading"></a></h4>
+<p>When developers just start typing, they tend to group everything related to a noun into a single place. The result is a “God class”—a single component doing far too much.</p>
+<div class="highlight-mermaid notranslate"><div class="highlight"><pre><span></span>classDiagram
+    class Book {
+        +String title
+        +String author
+        +String isbn
+        +saveToDatabase()
+        +formatForWebDisplay()
+        +sendOverdueEmail()
+        +calculateLateFees()
+    }
 </pre></div>
 </div>
 <p>In this system, the <code class="docutils literal notranslate"><span class="pre">Book</span></code> component handles data storage, web presentation, business logic (fees), and external communication (emails). It is highly brittle.</p>
+</section>
 <section id="the-system-that-was-designed-separated-concerns">
-<h1>§4.2 The System That Was Designed (Separated Concerns)<a class="headerlink" href="#the-system-that-was-designed-separated-concerns" title="Link to this heading"></a></h1>
-<p>A designed system applies the principle of <strong>separation of concerns</strong>. We break the God class apart so that each component has one, clearly defined responsibility.</p>
+<h4>§4.2 The System That Was Designed (Separated Concerns)<a class="headerlink" href="#the-system-that-was-designed-separated-concerns" title="Link to this heading"></a></h4>
+<p>A designed system applies the principle of <strong>separation of concerns</strong>.<a class="footnote-reference brackets" href="#id10" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> We break the God class apart so that each component has one, clearly defined responsibility.</p>
 <div class="highlight-mermaid notranslate"><div class="highlight"><pre><span></span>classDiagram
     class Book {
         +String title
@@ -252,19 +245,21 @@ When developers just start typing, they tend to group everything related to a no
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">Book</span></code> is just data. The storage logic lives in <code class="docutils literal notranslate"><span class="pre">BookRepository</span></code>, the UI logic in <code class="docutils literal notranslate"><span class="pre">BookFormatter</span></code>, and the email logic in <code class="docutils literal notranslate"><span class="pre">NotificationService</span></code>. If the database changes, the UI logic is untouched.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Architecture is ultimately a communication tool. A well-designed system like the one in §4.2 communicates its intent clearly to the next developer who reads it.</p>
+<p>Architecture is ultimately a communication tool. A well-designed system like the one in <a class="reference external" href="https://www.google.com/search?q=%234.2">§4.2</a> communicates its intent clearly to the next developer who reads it.</p>
 </div>
 </section>
-<section id="id1">
-<h1>§5<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+</section>
+</section>
+<section id="id9">
+<h2>§5<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
 <section id="looking-ahead-patterns-and-philosophy">
-<h2>Looking Ahead: Patterns and Philosophy<a class="headerlink" href="#looking-ahead-patterns-and-philosophy" title="Link to this heading"></a></h2>
+<h3>Looking Ahead: Patterns and Philosophy<a class="headerlink" href="#looking-ahead-patterns-and-philosophy" title="Link to this heading"></a></h3>
 <p>As we expand the library system in the coming lessons, we will name specific design patterns (like the <em>Factory pattern</em> or the <em>Observer pattern</em>) as they naturally emerge from our architectural decisions. We will also begin integrating a robust testing philosophy, ensuring that as our system’s architecture solidifies, our confidence in its correctness scales alongside it.</p>
+</section>
+</section>
 <hr class="docutils" />
-</section>
-</section>
 <section id="summary">
-<h1>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h1>
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Concept</p></th>
@@ -291,21 +286,21 @@ When developers just start typing, they tend to group everything related to a no
 </tr>
 </tbody>
 </table>
-<hr class="docutils" />
 </section>
+<hr class="docutils" />
 <section id="formative-assessment">
-<h1>Formative Assessment<a class="headerlink" href="#formative-assessment" title="Link to this heading"></a></h1>
+<h2>Formative Assessment<a class="headerlink" href="#formative-assessment" title="Link to this heading"></a></h2>
 <section id="recall">
-<h2>Recall<a class="headerlink" href="#recall" title="Link to this heading"></a></h2>
+<h3>Recall<a class="headerlink" href="#recall" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>What is the difference between a bug and technical debt? <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code></p></li>
 <li><p>In the SDLC, which phase must occur immediately before implementation (coding)? <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code></p></li>
 </ol>
 </section>
 <section id="application-reflection">
-<h2>Application / Reflection<a class="headerlink" href="#application-reflection" title="Link to this heading"></a></h2>
+<h3>Application / Reflection<a class="headerlink" href="#application-reflection" title="Link to this heading"></a></h3>
 <ol class="arabic simple" start="3">
-<li><p>Look at the “God class” diagram in §4.1. If the library decides to switch from sending overdue emails to sending overdue SMS text messages, why does the <code class="docutils literal notranslate"><span class="pre">Book</span></code> class need to be modified? Why is this architecturally problematic? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
+<li><p>Look at the “God class” diagram in <a class="reference external" href="https://www.google.com/search?q=%234.1">§4.1</a>. If the library decides to switch from sending overdue emails to sending overdue SMS text messages, why does the <code class="docutils literal notranslate"><span class="pre">Book</span></code> class need to be modified? Why is this architecturally problematic? <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code></p></li>
 </ol>
 <details>
 <summary>📋 Memorandum — check your answers here</summary>
@@ -317,10 +312,10 @@ Self-marking without attempting is not self-marking — it is reading.</p>
 </section>
 <hr class="docutils" />
 <section id="question-1-recall-2-marks-bt2-understand">
-<h2>Question 1 — Recall (2 marks) <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code><a class="headerlink" href="#question-1-recall-2-marks-bt2-understand" title="Link to this heading"></a></h2>
+<h3>Question 1 — Recall (2 marks) <code class="docutils literal notranslate"><span class="pre">[BT2</span> <span class="pre">—</span> <span class="pre">Understand]</span></code><a class="headerlink" href="#question-1-recall-2-marks-bt2-understand" title="Link to this heading"></a></h3>
 <p><strong>Correct answer:</strong>
 A bug is code that does not function correctly or produces an error. Technical debt is code that functions perfectly well, but is structured poorly, making future changes expensive, risky, and slow.</p>
-<p><strong>Source:</strong> L01 §2 — “The SDLC and Technical Debt”</p>
+<p><strong>Source:</strong> <a class="reference external" href="https://www.google.com/search?q=%232">L01 §2</a> — “The SDLC and Technical Debt”</p>
 <p><strong>Common mistakes:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -332,21 +327,21 @@ A bug is code that does not function correctly or produces an error. Technical d
 <tbody>
 <tr class="row-even"><td><p>Equating technical debt to broken code</p></td>
 <td><p>Technical debt often passes all tests and works perfectly for the end user.</p></td>
-<td><p>Suggests misunderstanding of structural cost vs functional correctness — revisit L01 §2</p></td>
+<td><p>Suggests misunderstanding of structural cost vs functional correctness — revisit <a class="reference external" href="https://www.google.com/search?q=%232">L01 §2</a></p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <hr class="docutils" />
 <section id="question-2-recall-1-mark-bt1-remember">
-<h2>Question 2 — Recall (1 mark) <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code><a class="headerlink" href="#question-2-recall-1-mark-bt1-remember" title="Link to this heading"></a></h2>
+<h3>Question 2 — Recall (1 mark) <code class="docutils literal notranslate"><span class="pre">[BT1</span> <span class="pre">—</span> <span class="pre">Remember]</span></code><a class="headerlink" href="#question-2-recall-1-mark-bt1-remember" title="Link to this heading"></a></h3>
 <p><strong>Correct answer:</strong>
 The Design (Architecture) phase.</p>
-<p><strong>Source:</strong> L01 §2 — “The SDLC and Technical Debt”</p>
+<p><strong>Source:</strong> <a class="reference external" href="https://www.google.com/search?q=%232">L01 §2</a> — “The SDLC and Technical Debt”</p>
 </section>
 <hr class="docutils" />
 <section id="question-3-application-reflection-5-marks-bt3-apply">
-<h2>Question 3 — Application / Reflection (5 marks) <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code><a class="headerlink" href="#question-3-application-reflection-5-marks-bt3-apply" title="Link to this heading"></a></h2>
+<h3>Question 3 — Application / Reflection (5 marks) <code class="docutils literal notranslate"><span class="pre">[BT3</span> <span class="pre">—</span> <span class="pre">Apply]</span></code><a class="headerlink" href="#question-3-application-reflection-5-marks-bt3-apply" title="Link to this heading"></a></h3>
 <p><strong>Rubric:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -372,8 +367,8 @@ The Design (Architecture) phase.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Source:</strong> L01 §4.1 — “The System That Grew (The God Class)”
-<strong>Source:</strong> L01 §4.2 — “The System That Was Designed (Separated Concerns)”</p>
+<p><strong>Source:</strong> <a class="reference external" href="https://www.google.com/search?q=%234.1">L01 §4.1</a> — “The System That Grew (The God Class)”<br />
+<strong>Source:</strong> <a class="reference external" href="https://www.google.com/search?q=%234.2">L01 §4.2</a> — “The System That Was Designed (Separated Concerns)”</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This question assesses quality of reasoning, not correctness of conclusion. A well-argued case for a non-optimal solution scores higher than a correct answer stated without justification.</p>
@@ -388,27 +383,38 @@ The Design (Architecture) phase.</p>
 <strong>Suggested threshold: 5.5 marks before proceeding</strong></p>
 <p>If you scored below the threshold, review the diagnostic notes above before continuing to the next lesson.</p>
 </details>
+</section>
+</section>
 <hr class="docutils" />
-</section>
-</section>
 <section id="key-terms">
-<h1>Key Terms<a class="headerlink" href="#key-terms" title="Link to this heading"></a></h1>
+<h2>Key Terms<a class="headerlink" href="#key-terms" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><strong>system architecture</strong>: The high-level structure of a software system — its components, their responsibilities, and how they interact</p></li>
 <li><p><strong>SDLC</strong>: Software Development Lifecycle — the phases a software project moves through from conception to deployment</p></li>
 <li><p><strong>technical debt</strong>: The implied cost of future rework caused by choosing a quick solution now</p></li>
 <li><p><strong>coupling</strong>: The degree to which one component depends on another</p></li>
 <li><p><strong>cohesion</strong>: The degree to which the elements within a component belong together</p></li>
+<li><p><strong>separation of concerns</strong>: The principle that each component should have one clearly defined responsibility</p></li>
 </ul>
+</section>
 <hr class="docutils" />
-</section>
 <section id="what-s-next">
-<h1>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading"></a></h1>
-<p>Now that you understand the difference between a system that grew and a system that was designed, we need to formalize how to evaluate those designs. In Lesson 2, we will dive deeper into “Separation of Concerns” and introduce the metrics of <em>Coupling</em> and <em>Cohesion</em> to measure the health of our architecture.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
+<h2>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading"></a></h2>
+<p>Now that you understand the difference between a system that grew and a system that was designed, we need to formalize how to evaluate those designs. In <a class="reference external" href="https://www.google.com/search?q=./L02.md">Lesson 2</a>, we will dive deeper into “Separation of Concerns” and introduce the metrics of <em>Coupling</em> and <em>Cohesion</em> to measure the health of our architecture.</p>
 </section>
+<hr class="docutils" />
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+</section>
+</section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id8">2</a>)</span>
+<p>Dijkstra, Edsger W. “On the Role of Scientific Thought.” <em>Selected Writings on Computing</em>, 1982.</p>
+</aside>
+</aside>
 
 
            </div>
